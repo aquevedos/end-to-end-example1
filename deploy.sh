@@ -161,6 +161,7 @@ fi
 currentDir=$(pwd -P)
 export TF_LOG=INFO
 export TF_LOG_PATH="${currentDir}/tf.log"
+export GOOGLE_OAUTH_ACCESS_TOKEN="$(gcloud auth print-access-token 2>/dev/null || true)"
 
 cd "./terraform"
 

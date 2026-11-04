@@ -26,8 +26,16 @@ if [[ -z "${GCP_ACCOUNT_NAME}" || -z "${PROJECT_ID}" ]]; then
   exit 1
 fi
 
+export CLOUDSDK_CORE_ACCOUNT="${GCP_ACCOUNT_NAME}"
+export CLOUDSDK_CORE_PROJECT="${PROJECT_ID}"
+
 # 4. Obtiene automáticamente el Project Number a partir del Project ID
 PROJECT_NUMBER="${3:-$(gcloud projects describe "${PROJECT_ID}" --format="value(projectNumber)" 2>/dev/null)}"
+
+STATE_ARG=()
+if [[ -f "${TF_DIR}/terraform.${PROJECT_ID}.tfstate" ]]; then
+  STATE_ARG=("-state=terraform.${PROJECT_ID}.tfstate")
+fi
 
 echo "=================================================================="
 echo "🧹 Iniciando UNDEPLOY (Eliminación de recursos MVP en GCP)"
@@ -36,11 +44,12 @@ echo "📂 Ruta Terraform  : ${TF_DIR}"
 echo "👤 Cuenta GCP      : ${GCP_ACCOUNT_NAME}"
 echo "🆔 Project ID      : ${PROJECT_ID}"
 echo "🔢 Project Number  : ${PROJECT_NUMBER}"
+echo "💾 Estado Terraform: ${STATE_ARG[0]:--state=terraform.tfstate (por defecto)}"
 echo "=================================================================="
 
 # 5. Limpia recursos anidados de Dataform (Workspaces y Notebooks creados vía REST API) con ?force=true
 echo "🔄 Limpiando repositorios y workspaces anidados de Dataform..."
-ACCESS_TOKEN="$(gcloud auth print-access-token 2>/dev/null || true)"
+ACCESS_TOKEN="$(gcloud auth print-access-token --account="${GCP_ACCOUNT_NAME}" 2>/dev/null || true)"
 if [[ -n "${ACCESS_TOKEN}" ]]; then
   export GOOGLE_OAUTH_ACCESS_TOKEN="${ACCESS_TOKEN}"
   curl -s -X DELETE \
@@ -64,9 +73,10 @@ bq update --deletion_protection=false "${PROJECT_ID}:taxi_dataset.taxi_trips_wit
 bq update --deletion_protection=false "${PROJECT_ID}:taxi_dataset.taxi_trips_streaming" 2>/dev/null || true
 bq rm -r -f -d "${PROJECT_ID}:ghcn_daily" 2>/dev/null || true
 
-if terraform -chdir="${TF_DIR}" state list 2>/dev/null | grep -q "module.resources.google_bigquery_table."; then
+if terraform -chdir="${TF_DIR}" state list "${STATE_ARG[@]}" 2>/dev/null | grep -q "module.resources.google_bigquery_table."; then
   echo "🔄 Sincronizando deletion_protection=false en el estado de Terraform..."
   terraform -chdir="${TF_DIR}" apply -auto-approve \
+    "${STATE_ARG[@]}" \
     -target="module.resources.google_bigquery_table.default" \
     -target="module.resources.google_bigquery_table.taxi_trips_streaming" \
     -var="gcp_account_name=${GCP_ACCOUNT_NAME}" \
@@ -75,21 +85,22 @@ if terraform -chdir="${TF_DIR}" state list 2>/dev/null | grep -q "module.resourc
 fi
 
 # 7. Evita que Terraform desactive las APIs base del proyecto o quite permisos IAM al usuario dueño del proyecto
-if terraform -chdir="${TF_DIR}" state list 2>/dev/null | grep -q "module.apis-batch-enable"; then
+if terraform -chdir="${TF_DIR}" state list "${STATE_ARG[@]}" 2>/dev/null | grep -q "module.apis-batch-enable"; then
   echo "🔄 Conservando APIs base activas en el proyecto (evitando errores de dependencia entre APIs)..."
-  terraform -chdir="${TF_DIR}" state rm "module.apis-batch-enable" >/dev/null 2>&1 || true
+  terraform -chdir="${TF_DIR}" state rm "${STATE_ARG[@]}" "module.apis-batch-enable" >/dev/null 2>&1 || true
 fi
 
-if terraform -chdir="${TF_DIR}" state list 2>/dev/null | grep -q "module.service-account.google_project_iam_member.gcp_account_owner"; then
-  terraform -chdir="${TF_DIR}" state rm "module.service-account.google_project_iam_member.gcp_account_owner" >/dev/null 2>&1 || true
+if terraform -chdir="${TF_DIR}" state list "${STATE_ARG[@]}" 2>/dev/null | grep -q "module.service-account.google_project_iam_member.gcp_account_owner"; then
+  terraform -chdir="${TF_DIR}" state rm "${STATE_ARG[@]}" "module.service-account.google_project_iam_member.gcp_account_owner" >/dev/null 2>&1 || true
 fi
 
-if terraform -chdir="${TF_DIR}" state list 2>/dev/null | grep -q "module.service-account.google_project_iam_member.impersonation_account_owner"; then
-  terraform -chdir="${TF_DIR}" state rm "module.service-account.google_project_iam_member.impersonation_account_owner" >/dev/null 2>&1 || true
+if terraform -chdir="${TF_DIR}" state list "${STATE_ARG[@]}" 2>/dev/null | grep -q "module.service-account.google_project_iam_member.impersonation_account_owner"; then
+  terraform -chdir="${TF_DIR}" state rm "${STATE_ARG[@]}" "module.service-account.google_project_iam_member.impersonation_account_owner" >/dev/null 2>&1 || true
 fi
 
 # 8. Ejecuta Terraform Destroy
 terraform -chdir="${TF_DIR}" destroy \
+  "${STATE_ARG[@]}" \
   -var="gcp_account_name=${GCP_ACCOUNT_NAME}" \
   -var="project_id=${PROJECT_ID}" \
   -var="project_number=${PROJECT_NUMBER}"
