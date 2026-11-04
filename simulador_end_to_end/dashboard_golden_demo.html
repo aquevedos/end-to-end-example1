@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; object-src 'none'; frame-ancestors 'self';" />
+  <title>Google Cloud Data Analytics Golden Demo — Simulador End-to-End</title>
+  <style>
+    :root {
+      /* Paleta Oficial de Google Cloud + Tonos Pasteles */
+      --gcp-blue: #4285F4;
+      --gcp-blue-dark: #1967D2;
+      --gcp-pastel-blue: #E8F0FE;
+      --gcp-green: #34A853;
+      --gcp-green-dark: #137333;
+      --gcp-pastel-green: #E6F4EA;
+      --gcp-yellow: #FBBC04;
+      --gcp-yellow-dark: #B06000;
+      --gcp-pastel-yellow: #FEF7E0;
+      --gcp-red: #EA4335;
+      --gcp-red-dark: #C5221F;
+      --gcp-pastel-red: #FCE8E6;
+      --gcp-purple: #9334E6;
+      --gcp-pastel-purple: #F3E8FD;
+      --gcp-teal: #00ACC1;
+      --gcp-pastel-teal: #E0F7FA;
+      --bg-surface: #F8FAFD;
+      --card-bg: #FFFFFF;
+      --text-primary: #202124;
+      --text-secondary: #5F6368;
+      --border-soft: #DADCE0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #E8F0FE 0%, #F8FAFD 50%, #E6F4EA 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 28px 32px;
+      box-shadow: 0 8px 24px rgba(66, 133, 244, 0.08);
+      border: 2px solid var(--gcp-pastel-blue);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .gcp-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--gcp-pastel-blue);
+      color: var(--gcp-blue-dark);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--gcp-blue);
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-top: 4px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03);
+      transition: transform 0.15s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .kpi-blue { background: var(--gcp-pastel-blue); border-left: 5px solid var(--gcp-blue); }
+    .kpi-green { background: var(--gcp-pastel-green); border-left: 5px solid var(--gcp-green); }
+    .kpi-yellow { background: var(--gcp-pastel-yellow); border-left: 5px solid var(--gcp-yellow); }
+    .kpi-red { background: var(--gcp-pastel-red); border-left: 5px solid var(--gcp-red); }
+    .kpi-purple { background: var(--gcp-pastel-purple); border-left: 5px solid var(--gcp-purple); }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-secondary);
+    }
+
+    .kpi-value {
+      font-size: 1.9rem;
+      font-weight: 800;
+      margin: 6px 0;
+      color: var(--text-primary);
+    }
+
+    .kpi-detail {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    .tabs-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      background: var(--card-bg);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-soft);
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      background: var(--gcp-pastel-blue);
+      color: var(--gcp-blue-dark);
+      border-color: var(--gcp-blue);
+    }
+
+    .tab-btn.active {
+      background: var(--gcp-blue);
+      color: #FFFFFF;
+      border-color: var(--gcp-blue);
+      box-shadow: 0 4px 12px rgba(66, 133, 244, 0.28);
+    }
+
+    .panel {
+      display: none;
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 28px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border-soft);
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--gcp-pastel-blue);
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .pill-blue { background: var(--gcp-pastel-blue); color: var(--gcp-blue-dark); }
+    .pill-green { background: var(--gcp-pastel-green); color: var(--gcp-green-dark); }
+    .pill-yellow { background: var(--gcp-pastel-yellow); color: var(--gcp-yellow-dark); }
+    .pill-red { background: var(--gcp-pastel-red); color: var(--gcp-red-dark); }
+    .pill-purple { background: var(--gcp-pastel-purple); color: var(--gcp-purple); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+
+    th {
+      background: var(--gcp-pastel-blue);
+      color: var(--gcp-blue-dark);
+      text-align: left;
+      padding: 12px 14px;
+      font-weight: 700;
+      border-bottom: 2px solid var(--gcp-blue);
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #EEF2F6;
+      color: var(--text-primary);
+    }
+
+    tr:hover td {
+      background: #F8FBFF;
+    }
+
+    .controls-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      background: var(--gcp-pastel-yellow);
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--gcp-yellow);
+    }
+
+    .btn-action {
+      background: var(--gcp-green);
+      color: #FFFFFF;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-action.secondary {
+      background: var(--gcp-blue);
+    }
+
+    .cards-two-col {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 18px;
+      margin-top: 14px;
+    }
+
+    .profile-card {
+      background: var(--bg-surface);
+      border-radius: 14px;
+      padding: 18px;
+      border: 1px solid var(--border-soft);
+    }
+
+    .profile-card h3 {
+      color: var(--gcp-blue-dark);
+      margin-bottom: 8px;
+      font-size: 1.08rem;
+    }
+
+    .profile-meta {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .sql-snippet {
+      background: #1E293B;
+      color: #E2E8F0;
+      padding: 14px 18px;
+      border-radius: 12px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.82rem;
+      overflow-x: auto;
+      margin: 12px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand-title">
+        <div>
+          <span class="gcp-badge">☁️ Google Cloud Platform • Level 200/300 Architecture</span>
+          <h1>Data Analytics Golden Demo — Simulador Interactivo End-to-End</h1>
+          <p class="subtitle">Carpeta: /usr/local/google/home/anitaquevedo/antigravity/end-to-end • Paleta Google Cloud &amp; Tonos Pasteles</p>
+        </div>
+      </div>
+      <div>
+        <span class="pill pill-green">✓ SQLite Lakehouse Activo</span>
+        <span class="pill pill-blue">✓ Terraform IaC Declarativo</span>
+        <span class="pill pill-purple">✓ Gemini 2.5 Flash + BQML</span>
+      </div>
+    </header>
+
+    <section class="kpi-grid">
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-label">1. Raw Zone (Multi-Cloud &amp; CDC)</div>
+        <div class="kpi-value">142 Eventos</div>
+        <div class="kpi-detail">20 Zonas NYC • 60 AWS/Azure Omni • 24 CDC • 30 Stream</div>
+      </div>
+      <div class="kpi-card kpi-yellow">
+        <div class="kpi-label">2. Enriched Zone (Iceberg + Vision)</div>
+        <div class="kpi-value">120 Viajes</div>
+        <div class="kpi-detail">Apache Iceberg v2 + 8 Imágenes Vision AI + AEAD</div>
+      </div>
+      <div class="kpi-card kpi-purple">
+        <div class="kpi-label">3. Curated AI Lakehouse (Gemini)</div>
+        <div class="kpi-value">9 Perfiles 360°</div>
+        <div class="kpi-detail">4 Clientes + 5 Conductores + Vector Cosine Match</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-label">4. BQML High-Value Predictions</div>
+        <div class="kpi-value">96.4% Top</div>
+        <div class="kpi-detail">JFK Airport &amp; Times Square (Despacho en Tiempo Real)</div>
+      </div>
+      <div class="kpi-card kpi-red">
+        <div class="kpi-label">5. Gobernanza Dataplex &amp; RLS</div>
+        <div class="kpi-value">100% DQ Pass</div>
+        <div class="kpi-detail">5/5 Reglas Dataplex • RLS Manhattan • PII Masked</div>
+      </div>
+    </section>
+
+    <nav class="tabs-bar" id="tabsBar">
+      <button class="tab-btn active" data-target="panel-architecture">1. Arquitectura Medallion &amp; Terraform</button>
+      <button class="tab-btn" data-target="panel-rls">2. Raw Zone: BigLake RLS &amp; Omni Multi-Cloud</button>
+      <button class="tab-btn" data-target="panel-iceberg">3. Enriched Zone: Apache Iceberg, Vision AI &amp; AEAD</button>
+      <button class="tab-btn" data-target="panel-gemini">4. Curated Zone: Gemini 2.5 Flash &amp; Vector Match</button>
+      <button class="tab-btn" data-target="panel-bqml">5. BQML Predict &amp; Dataplex Data Quality</button>
+    </nav>
+
+    <!-- PANEL 1: ARQUITECTURA -->
+    <section class="panel active" id="panel-architecture">
+      <div class="panel-header">
+        <div>
+          <h2>Recorrido Arquitectónico Paso a Paso (De Terraform IaC a Consumo IA)</h2>
+          <p class="subtitle">Todos los módulos de <code>data-analytics-golden-demo</code> instalados y simulados en tu carpeta <code>end-to-end</code>.</p>
+        </div>
+        <span class="pill pill-blue">GitOps &amp; Declarative State</span>
+      </div>
+      <div class="cards-two-col" id="archStepsContainer"></div>
+    </section>
+
+    <!-- PANEL 2: RAW ZONE, RLS & OMNI -->
+    <section class="panel" id="panel-rls">
+      <div class="panel-header">
+        <div>
+          <h2>Zona Raw: Gobernanza Row-Level Security (RLS) y Federación BigQuery Omni</h2>
+          <p class="subtitle">Simula en vivo la política <code>rls_biglake_rideshare_zone_csv</code> de <code>sp_demo_script.sql</code>.</p>
+        </div>
+        <span class="pill pill-yellow">BigLake + AWS S3 + Azure ADLS</span>
+      </div>
+
+      <div class="controls-row">
+        <strong>Simulador de Política BigLake RLS:</strong>
+        <button class="btn-action" id="btnApplyRls">Aplicar RLS (borough = 'Manhattan')</button>
+        <button class="btn-action secondary" id="btnDropRls">DROP ALL ROW ACCESS POLICIES (Ver 20 Zonas)</button>
+        <span id="rlsStatusBadge" class="pill pill-green">Mostrando: Todas las Zonas (20)</span>
+      </div>
+
+      <div class="sql-snippet">CREATE OR REPLACE ROW ACCESS POLICY rls_biglake_rideshare_zone_csv ON `project.rideshare_raw.biglake_rideshare_zone_csv` GRANT TO ("user:architect@example.com") FILTER USING (borough = 'Manhattan');</div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Location ID</th>
+            <th>Borough</th>
+            <th>Zone</th>
+            <th>Service Zone (Data Masking Demo)</th>
+            <th>Coordenadas GPS</th>
+          </tr>
+        </thead>
+        <tbody id="rlsTableBody"></tbody>
+      </table>
+
+      <h3 style="margin-top: 28px; color: var(--gcp-blue-dark);">Federación Multi-Cloud con BigQuery Omni (AWS S3 &amp; Azure ADLS)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Cloud Provider (Conexión Externa)</th>
+            <th>Viajes Consultados (CTAS)</th>
+            <th>Promedio Pasajeros</th>
+            <th>Propina Promedio (USD)</th>
+            <th>Tarifa Total Promedio (USD)</th>
+          </tr>
+        </thead>
+        <tbody id="omniTableBody"></tbody>
+      </table>
+    </section>
+
+    <!-- PANEL 3: ENRICHED ZONE (ICEBERG + VISION AI + BIGSEARCH) -->
+    <section class="panel" id="panel-iceberg">
+      <div class="panel-header">
+        <div>
+          <h2>Zona Enriched: Apache Iceberg v2, BigSearch Index &amp; Vision AI Object Tables</h2>
+          <p class="subtitle">Enmascaramiento estricto de PII (<code>****-****-****-XXXX</code>) y cifrado por columna AEAD con Crypto-Shredding.</p>
+        </div>
+        <span class="pill pill-purple">Apache Iceberg + Cloud Vision AI</span>
+      </div>
+
+      <div class="controls-row">
+        <strong>Buscador Instantáneo BigSearch (<code>SEARCH(bigquery_rideshare_trip, ?)</code>):</strong>
+        <input type="text" id="bigsearchInput" value="5710" placeholder="Últimos 4 dígitos o Trip ID..." style="padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc;" />
+        <button class="btn-action secondary" id="btnRunSearch">Ejecutar BigSearch Index</button>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Trip ID (Iceberg v2)</th>
+            <th>Pickup / Dropoff ID</th>
+            <th>Distancia (mi)</th>
+            <th>Total (USD)</th>
+            <th>Tarjeta (PII Masked)</th>
+            <th>Cifrado Columna AEAD / Crypto-Shredding</th>
+          </tr>
+        </thead>
+        <tbody id="icebergTableBody"></tbody>
+      </table>
+
+      <h3 style="margin-top: 28px; color: var(--gcp-blue-dark);">Análisis de Datos No Estructurados (BigLake Object Table + Cloud Vision AI)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>URI en Cloud Storage</th>
+            <th>Location ID</th>
+            <th>Objeto Detectado (Vision AI)</th>
+            <th>Confianza Objeto</th>
+            <th>Landmark Detectado</th>
+            <th>Estado Seguridad</th>
+          </tr>
+        </thead>
+        <tbody id="visionTableBody"></tbody>
+      </table>
+    </section>
+
+    <!-- PANEL 4: GEMINI 2.5 FLASH & VECTOR SEARCH -->
+    <section class="panel" id="panel-gemini">
+      <div class="panel-header">
+        <div>
+          <h2>Zona Curated: Perfiles 360° con Gemini 2.5 Flash y Emparejamiento Vectorial</h2>
+          <p class="subtitle">Simulación de <code>ML.GENERATE_TEXT</code> (Sentimiento + Temas) y <code>VECTOR_SEARCH</code> con <code>text-embedding-005</code>.</p>
+        </div>
+        <span class="pill pill-green">Vertex AI Gemini 2.5 Flash</span>
+      </div>
+
+      <div class="cards-two-col" id="geminiProfilesContainer"></div>
+
+      <h3 style="margin-top: 28px; color: var(--gcp-blue-dark);">Extracción de Sentimiento y Atributos sobre Reseñas con Gemini 2.5 Flash</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Trip ID</th>
+            <th>Cliente</th>
+            <th>Conductor</th>
+            <th>Reseña Original</th>
+            <th>Sentimiento</th>
+            <th>Atributos Conductor (Gemini)</th>
+          </tr>
+        </thead>
+        <tbody id="reviewsTableBody"></tbody>
+      </table>
+    </section>
+
+    <!-- PANEL 5: BQML & DATAPLEX -->
+    <section class="panel" id="panel-bqml">
+      <div class="panel-header">
+        <div>
+          <h2>Predicción BQML de Viajes de Alto Valor &amp; Calidad de Datos Dataplex</h2>
+          <p class="subtitle">Resultados del modelo <code>sp_model_training.sql</code> y auditoría automatizada de <code>sample-dataplex-run-data-quality.py</code>.</p>
+        </div>
+        <span class="pill pill-red">BQML + Dataplex Governance</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Zona (Borough)</th>
+            <th>Hora</th>
+            <th>Distancia Media</th>
+            <th>Clima Lluvia</th>
+            <th>Personas Esperando</th>
+            <th>Probabilidad Alto Valor (BQML)</th>
+            <th>Acción Operativa Recomendada</th>
+          </tr>
+        </thead>
+        <tbody id="bqmlTableBody"></tbody>
+      </table>
+
+      <h3 style="margin-top: 28px; color: var(--gcp-green-dark);">Auditoría de Calidad de Datos en Dataplex (Data Quality Scans)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Check ID</th>
+            <th>Dataset / Tabla</th>
+            <th>Columna</th>
+            <th>Tipo de Regla</th>
+            <th>Filas Evaluadas</th>
+            <th>Cumplimiento</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody id="dataplexTableBody"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <script>
+    // Datos deterministas generados por simulate_golden_demo.py
+    const SIMULATION_DATA = {
+      archSteps: [
+        {
+          title: "Paso 1: Infraestructura como Código (terraform/ & terraform-modules/)",
+          badge: "Terraform IaC + Service Account Impersonation",
+          desc: "Despliega la Landing Zone sin exportar llaves JSON privadas (usa google.service_principal_impersonation). Habilita APIs en lote, configura políticas de organización, crea buckets GCS, datasets BigQuery (Raw, Enriched, Curated), instancias Cloud SQL Postgres con Private Service Connect, Spanner, Dataproc Serverless y Cloud Composer."
+        },
+        {
+          title: "Paso 2: Orquestación con Cloud Composer (cloud-composer/dags/)",
+          badge: "36 DAGs de Apache Airflow",
+          desc: "Orquesta la descarga de datos públicos de taxis/rideshare, la hidratación de tablas BigLake, el arranque de jobs streaming en Dataflow, la replicación CDC con Datastream y los escaneos de perfilado y calidad de datos en Dataplex."
+        },
+        {
+          title: "Paso 3: Zona Raw — Ingesta Híbrida, Multi-Cloud Omni y Object Tables",
+          badge: "sql-scripts/rideshare_lakehouse_raw/",
+          desc: "Unifica archivos Parquet/CSV en GCS mediante tablas BigLake con seguridad por fila (RLS) y enmascaramiento dinámico, consulta S3 (AWS) y ADLS (Azure) vía BigQuery Omni sin mover datos en bruto, e indexa imágenes en GCS mediante Object Tables."
+        },
+        {
+          title: "Paso 4: Zona Enriched — Apache Iceberg (BigSpark) y Cloud Vision AI",
+          badge: "sql-scripts/rideshare_lakehouse_enriched/",
+          desc: "Ejecuta procedimientos almacenados PySpark dentro de BigQuery (BigSpark) para transformar datos hacia tablas abiertas Apache Iceberg v2 registradas en BigLake Metastore, y ejecuta funciones remotas de Cloud Vision AI para detectar objetos y monumentos en fotos de viajes."
+        },
+        {
+          title: "Paso 5: Zona Curated — Gemini 2.5 Flash, Embeddings y BigSearch",
+          badge: "sql-scripts/rideshare_llm_curated/ & colab-enterprise/",
+          desc: "Conecta BigQuery con Vertex AI (gemini-2.5-flash y text-embedding-005) para extraer sentimiento y temas de reseñas, construir resúmenes cualitativos/cuantitativos y emparejar pasajeros con conductores mediante similitud coseno."
+        },
+        {
+          title: "Paso 6: Consumo en Tiempo Real — BQML & Portal Cloud Run",
+          badge: "cloud-run/rideshare-plus-website/",
+          desc: "Entrena modelos en BigQuery ML para predecir viajes de alto valor según clima, ubicación y demanda en tiempo real, sirviendo las predicciones en una aplicación web alojada en Cloud Run."
+        }
+      ],
+      zones: [
+        { id: 1, borough: "EWR", zone: "Newark Airport", service: "EWR", gps: "40.6895, -74.1745" },
+        { id: 4, borough: "Manhattan", zone: "Alphabet City", service: "Yellow Zone", gps: "40.7262, -73.9789" },
+        { id: 12, borough: "Manhattan", zone: "Battery Park", service: "Yellow Zone", gps: "40.7027, -74.0158" },
+        { id: 13, borough: "Manhattan", zone: "Battery Park City", service: "Yellow Zone", gps: "40.7101, -74.0164" },
+        { id: 24, borough: "Manhattan", zone: "Bloomingdale", service: "Yellow Zone", gps: "40.7988, -73.9732" },
+        { id: 43, borough: "Manhattan", zone: "Central Park", service: "Yellow Zone", gps: "40.7943, -73.9548" },
+        { id: 48, borough: "Manhattan", zone: "Clinton East", service: "Yellow Zone", gps: "40.7355, -73.9906" },
+        { id: 68, borough: "Manhattan", zone: "East Chelsea", service: "Yellow Zone", gps: "40.7424, -74.0055" },
+        { id: 79, borough: "Manhattan", zone: "East Village", service: "Yellow Zone", gps: "40.7276, -73.9859" },
+        { id: 132, borough: "Queens", zone: "JFK Airport", service: "Airports", gps: "40.6413, -73.7781" },
+        { id: 138, borough: "Queens", zone: "LaGuardia Airport", service: "Airports", gps: "40.7769, -73.8740" },
+        { id: 161, borough: "Manhattan", zone: "Midtown Center", service: "Yellow Zone", gps: "40.7580, -73.9855" },
+        { id: 162, borough: "Manhattan", zone: "Midtown East", service: "Yellow Zone", gps: "40.7549, -73.9718" },
+        { id: 186, borough: "Manhattan", zone: "Penn Station/Madison Sq West", service: "Yellow Zone", gps: "40.7506, -73.9935" },
+        { id: 230, borough: "Manhattan", zone: "Times Sq/Theatre District", service: "Yellow Zone", gps: "40.7589, -73.9851" },
+        { id: 237, borough: "Manhattan", zone: "Upper East Side South", service: "Yellow Zone", gps: "40.7685, -73.9647" },
+        { id: 33, borough: "Brooklyn", zone: "Brooklyn Heights", service: "Boro Zone", gps: "40.6965, -73.9983" },
+        { id: 61, borough: "Brooklyn", zone: "Crown Heights North", service: "Boro Zone", gps: "40.6741, -73.9547" },
+        { id: 18, borough: "Bronx", zone: "Bedford Park", service: "Boro Zone", gps: "40.8721, -73.8879" },
+        { id: 5, borough: "Staten Island", zone: "Arden Heights", service: "Boro Zone", gps: "40.5546, -74.1852" }
+      ],
+      omni: [
+        { cloud: "AWS_S3_OMNI (s3://gcp-analytics-omni-bucket/...)", rides: 40, pax: 2.38, tip: 10.69, total: 67.26 },
+        { cloud: "AZURE_ADLS_OMNI (azure://gcpanalyticsadls.blob...)", rides: 20, pax: 2.50, tip: 9.76, total: 67.62 }
+      ],
+      icebergTrips: [
+        { id: "TRIP-ICEBERG-2026-0001", route: "Loc 230 → Loc 132 (JFK)", dist: 19.63, total: 108.43, cc: "****-****-****-5710", aead: "AEAD_CIPHERTEXT(58bc6f7077fa9d9444242376)" },
+        { id: "TRIP-ICEBERG-2026-0002", route: "Loc 161 → Loc 43 (Central Park)", dist: 4.82, total: 31.45, cc: "****-****-****-8492", aead: "AEAD_CIPHERTEXT(91a04bc8e120f8a7c4519821)" },
+        { id: "TRIP-ICEBERG-2026-0003", route: "Loc 138 → Loc 162 (Midtown East)", dist: 11.40, total: 74.18, cc: "****-****-****-3319", aead: "AEAD_CIPHERTEXT(44f9120c7781b3e091a87412)" },
+        { id: "TRIP-ICEBERG-2026-0004", route: "Loc 186 → Loc 33 (Brooklyn)", dist: 6.15, total: 36.90, cc: "****-****-****-1104", aead: "AEAD_CIPHERTEXT(7c823019fa4512b908123490)" },
+        { id: "TRIP-ICEBERG-2026-0120", route: "Loc 12 → Loc 1 (Newark)", dist: 15.20, total: 91.10, cc: "****-****-****-9981", aead: "[CRYPTO_SHREDDED_KEY_DESTROYED]" }
+      ],
+      visionImages: [
+        { uri: "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_001.jpg", loc: 230, obj: "Vehicle/Taxi Fleet", objConf: "97.4%", landmark: "Landmark: Times Square", status: "SAFE_TRAFFIC_FLOW" },
+        { uri: "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_002.jpg", loc: 132, obj: "Luggage & Passenger Queue", objConf: "96.8%", landmark: "Landmark: JFK Airport", status: "SAFE_TRAFFIC_FLOW" },
+        { uri: "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_003.jpg", loc: 43, obj: "Pedestrian & Bicycle", objConf: "95.1%", landmark: "Landmark: Central Park", status: "SAFE_TRAFFIC_FLOW" },
+        { uri: "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_004.jpg", loc: 186, obj: "High Crowd Density", objConf: "94.3%", landmark: "Landmark: Madison Square Garden", status: "SAFE_TRAFFIC_FLOW" }
+      ],
+      geminiProfiles: [
+        {
+          name: "Sofía Valdés (ID: 201)",
+          trips: 68,
+          spend: "$4,576.40",
+          attr: "Prefiere vehículos silenciosos para tomar llamadas ejecutivas, aire acondicionado fresco (68°F) y rutas directas a aeropuertos.",
+          matches: "1° Carlos Mendoza (Similitud: 0.9994) • 2° Elena Rostova (Similitud: 0.9912)"
+        },
+        {
+          name: "Liam O'Connor (ID: 202)",
+          trips: 42,
+          spend: "$2,280.60",
+          attr: "Viaja en familia con niños y equipaje; prefiere SUV espaciosa, conversación amena y recomendaciones gastronómicas.",
+          matches: "1° Marcus Vance (Similitud: 0.9989) • 2° Devon Brooks (Similitud: 0.9541)"
+        },
+        {
+          name: "Dr. Kenji Takahashi (ID: 203)",
+          trips: 95,
+          spend: "$3,629.00",
+          attr: "Prioriza seguridad vial, conducción ecológica sin frenazos, música jazz instrumental o silencio absoluto.",
+          matches: "1° Elena Rostova (Similitud: 0.9965) • 2° Aisha Patel (Similitud: 0.9961)"
+        },
+        {
+          name: "Camila Restrepo (ID: 204)",
+          trips: 38,
+          spend: "$1,640.50",
+          attr: "Usuaria frecuente en horas pico vespertinas; requiere cargador USB-C y rutas ágiles hacia Brooklyn Heights.",
+          matches: "1° Aisha Patel (Similitud: 0.9992) • 2° Elena Rostova (Similitud: 0.9948)"
+        }
+      ],
+      reviews: [
+        { trip: "TRIP-ICEBERG-2026-0001", cust: "Sofía Valdés", driver: "Carlos Mendoza", text: "Carlos arrived 4 minutes early for my 6 AM flight to JFK. Spotless EV, cool at 68F, quiet.", sent: "Positive", theme: "Punctual, Spotless EV, Quiet Cabin, Cool AC" },
+        { trip: "TRIP-ICEBERG-2026-0002", cust: "Liam O'Connor", driver: "Marcus Vance", text: "Marcus was fantastic with our two kids! Huge SUV that fit all four suitcases easily.", sent: "Positive", theme: "Large SUV Capacity, Family Friendly, Helpful" },
+        { trip: "TRIP-ICEBERG-2026-0003", cust: "Dr. Kenji Takahashi", driver: "Elena Rostova", text: "Very relaxing evening commute from Midtown East. Soft jazz and smooth braking.", sent: "Positive", theme: "Smooth Driving, Soft Jazz Music, Courteous" },
+        { trip: "TRIP-ICEBERG-2026-0005", cust: "Sofía Valdés", driver: "Devon Brooks", text: "Got there on time, but the car was warm and the driver braked hard twice in traffic.", sent: "Negative", theme: "Harsh Braking, Warm Cabin Temperature" }
+      ],
+      bqml: [
+        { zone: "JFK Airport (Queens)", hour: "18:00", dist: "16.8 mi", rain: "Sí (Lluvia)", pax: 142, prob: "96.4%", action: "DESPACHAR PRIORIDAD: Alta demanda ejecutiva + lluvia" },
+        { zone: "Times Sq/Theatre District (Manhattan)", hour: "18:00", dist: "7.4 mi", rain: "Sí (Lluvia)", pax: 118, prob: "92.8%", action: "POSICIONAR FLOTA: Salida de teatros y oficinas" },
+        { zone: "Midtown Center (Manhattan)", hour: "18:00", dist: "9.1 mi", rain: "Sí (Lluvia)", pax: 96, prob: "89.5%", action: "ALTA RENTABILIDAD: Viajes corporativos" },
+        { zone: "LaGuardia Airport (Queens)", hour: "18:00", dist: "11.2 mi", rain: "Sí (Lluvia)", pax: 88, prob: "87.2%", action: "DESPACHAR PRIORIDAD: Vuelos vespertinos" },
+        { zone: "Arden Heights (Staten Island)", hour: "18:00", dist: "3.2 mi", rain: "No", pax: 12, prob: "14.5%", action: "BAJA DEMANDA: Reubicar hacia Manhattan Sur" }
+      ],
+      dataplex: [
+        { id: "DQ-001", table: "rideshare_lakehouse_curated.bigquery_rideshare_trip", col: "rideshare_trip_id", rule: "NOT_NULL & UNIQUE", rows: 120, rate: "100.0%", status: "PASSED" },
+        { id: "DQ-002", table: "rideshare_lakehouse_curated.bigquery_rideshare_trip", col: "total_amount", rule: "VALUE_RANGE (0..1500)", rows: 120, rate: "100.0%", status: "PASSED" },
+        { id: "DQ-003", table: "rideshare_lakehouse_curated.bigquery_rideshare_trip", col: "pickup_location_id", rule: "REFERENTIAL_INTEGRITY", rows: 120, rate: "100.0%", status: "PASSED" },
+        { id: "DQ-004", table: "rideshare_llm_curated.customer_review", col: "review_sentiment", rule: "ALLOWED_VALUES", rows: 5, rate: "100.0%", status: "PASSED" },
+        { id: "DQ-005", table: "rideshare_lakehouse_curated.bigquery_rideshare_trip", col: "credit_card_masked", rule: "PII_MASKING_POLICY", rows: 120, rate: "100.0%", status: "PASSED" }
+      ]
+    };
+
+    function createCell(text, pillClass) {
+      const td = document.createElement("td");
+      if (pillClass) {
+        const span = document.createElement("span");
+        span.className = "pill " + pillClass;
+        span.textContent = text;
+        td.appendChild(span);
+      } else {
+        td.textContent = text;
+      }
+      return td;
+    }
+
+    function renderArchitecture() {
+      const container = document.getElementById("archStepsContainer");
+      container.replaceChildren();
+      SIMULATION_DATA.archSteps.forEach((step) => {
+        const card = document.createElement("div");
+        card.className = "profile-card";
+        const badge = document.createElement("span");
+        badge.className = "pill pill-blue";
+        badge.textContent = step.badge;
+        const h3 = document.createElement("h3");
+        h3.style.marginTop = "10px";
+        h3.textContent = step.title;
+        const p = document.createElement("p");
+        p.className = "subtitle";
+        p.textContent = step.desc;
+        card.appendChild(badge);
+        card.appendChild(h3);
+        card.appendChild(p);
+        container.appendChild(card);
+      });
+    }
+
+    function renderRlsTable(onlyManhattan) {
+      const tbody = document.getElementById("rlsTableBody");
+      tbody.replaceChildren();
+      const filtered = onlyManhattan
+        ? SIMULATION_DATA.zones.filter((z) => z.borough === "Manhattan")
+        : SIMULATION_DATA.zones;
+
+      filtered.forEach((z) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(createCell(String(z.id)));
+        tr.appendChild(createCell(z.borough, z.borough === "Manhattan" ? "pill-blue" : "pill-yellow"));
+        tr.appendChild(createCell(z.zone));
+        tr.appendChild(createCell(onlyManhattan ? "***MASKED_BY_POLICY***" : z.service));
+        tr.appendChild(createCell(z.gps));
+        tbody.appendChild(tr);
+      });
+
+      const badge = document.getElementById("rlsStatusBadge");
+      badge.textContent = onlyManhattan
+        ? "RLS Activo: Solo Manhattan (" + filtered.length + " de 20 zonas)"
+        : "Mostrando: Todas las Zonas (20)";
+      badge.className = onlyManhattan ? "pill pill-red" : "pill pill-green";
+    }
+
+    function renderOmniTable() {
+      const tbody = document.getElementById("omniTableBody");
+      tbody.replaceChildren();
+      SIMULATION_DATA.omni.forEach((o) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(createCell(o.cloud, "pill-blue"));
+        tr.appendChild(createCell(String(o.rides)));
+        tr.appendChild(createCell(String(o.pax)));
+        tr.appendChild(createCell("$" + o.tip.toFixed(2)));
+        tr.appendChild(createCell("$" + o.total.toFixed(2)));
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderIcebergTable(queryText) {
+      const tbody = document.getElementById("icebergTableBody");
+      tbody.replaceChildren();
+      const q = (queryText || "").trim().toLowerCase();
+      const rows = q
+        ? SIMULATION_DATA.icebergTrips.filter(
+            (t) => t.cc.toLowerCase().includes(q) || t.id.toLowerCase().includes(q)
+          )
+        : SIMULATION_DATA.icebergTrips;
+
+      rows.forEach((t) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(createCell(t.id));
+        tr.appendChild(createCell(t.route));
+        tr.appendChild(createCell(t.dist + " mi"));
+        tr.appendChild(createCell("$" + t.total.toFixed(2)));
+        tr.appendChild(createCell(t.cc, "pill-yellow"));
+        tr.appendChild(
+          createCell(
+            t.aead,
+            t.aead.includes("DESTROYED") ? "pill-red" : "pill-purple"
+          )
+        );
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderVisionTable() {
+      const tbody = document.getElementById("visionTableBody");
+      tbody.replaceChildren();
+      SIMULATION_DATA.visionImages.forEach((img) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(createCell(img.uri));
+        tr.appendChild(createCell("Loc " + img.loc));
+        tr.appendChild(createCell(img.obj, "pill-blue"));
+        tr.appendChild(createCell(img.objConf));
+        tr.appendChild(createCell(img.landmark));
+        tr.appendChild(createCell(img.status, "pill-green"));
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderGeminiSection() {
+      const container = document.getElementById("geminiProfilesContainer");
+      container.replaceChildren();
+      SIMULATION_DATA.geminiProfiles.forEach((prof) => {
+        const card = document.createElement("div");
+        card.className = "profile-card";
+        const h3 = document.createElement("h3");
+        h3.textContent = prof.name;
+        const meta = document.createElement("div");
+        meta.className = "profile-meta";
+        meta.textContent = "Viajes: " + prof.trips + " • Gasto Acumulado: " + prof.spend;
+        const pAttr = document.createElement("p");
+        pAttr.style.fontSize = "0.9rem";
+        pAttr.style.marginBottom = "10px";
+        pAttr.textContent = prof.attr;
+        const matchPill = document.createElement("div");
+        matchPill.className = "pill pill-purple";
+        matchPill.textContent = "Vector Match: " + prof.matches;
+        card.appendChild(h3);
+        card.appendChild(meta);
+        card.appendChild(pAttr);
+        card.appendChild(matchPill);
+        container.appendChild(card);
+      });
+
+      const tbody = document.getElementById("reviewsTableBody");
+      tbody.replaceChildren();
+      SIMULATION_DATA.reviews.forEach((r) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(createCell(r.trip));
+        tr.appendChild(createCell(r.cust));
+        tr.appendChild(createCell(r.driver));
+        tr.appendChild(createCell(r.text));
+        tr.appendChild(createCell(r.sent, r.sent === "Positive" ? "pill-green" : "pill-red"));
+        tr.appendChild(createCell(r.theme));
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderBqmlAndDataplex() {
+      const bqmlBody = document.getElementById("bqmlTableBody");
+      bqmlBody.replaceChildren();
+      SIMULATION_DATA.bqml.forEach((b) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(createCell(b.zone));
+        tr.appendChild(createCell(b.hour));
+        tr.appendChild(createCell(b.dist));
+        tr.appendChild(createCell(b.rain));
+        tr.appendChild(createCell(String(b.pax)));
+        tr.appendChild(createCell(b.prob, parseFloat(b.prob) > 80 ? "pill-green" : "pill-yellow"));
+        tr.appendChild(createCell(b.action));
+        bqmlBody.appendChild(tr);
+      });
+
+      const dqBody = document.getElementById("dataplexTableBody");
+      dqBody.replaceChildren();
+      SIMULATION_DATA.dataplex.forEach((d) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(createCell(d.id, "pill-blue"));
+        tr.appendChild(createCell(d.table));
+        tr.appendChild(createCell(d.col));
+        tr.appendChild(createCell(d.rule));
+        tr.appendChild(createCell(String(d.rows)));
+        tr.appendChild(createCell(d.rate));
+        tr.appendChild(createCell(d.status, "pill-green"));
+        dqBody.appendChild(tr);
+      });
+    }
+
+    // Event Listeners
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+        btn.classList.add("active");
+        const target = document.getElementById(btn.getAttribute("data-target"));
+        if (target) target.classList.add("active");
+      });
+    });
+
+    document.getElementById("btnApplyRls").addEventListener("click", () => renderRlsTable(true));
+    document.getElementById("btnDropRls").addEventListener("click", () => renderRlsTable(false));
+    document.getElementById("btnRunSearch").addEventListener("click", () => {
+      const val = document.getElementById("bigsearchInput").value;
+      renderIcebergTable(val);
+    });
+
+    // Inicialización segura
+    renderArchitecture();
+    renderRlsTable(false);
+    renderOmniTable();
+    renderIcebergTable("");
+    renderVisionTable();
+    renderGeminiSection();
+    renderBqmlAndDataplex();
+  </script>
+</body>
+</html>

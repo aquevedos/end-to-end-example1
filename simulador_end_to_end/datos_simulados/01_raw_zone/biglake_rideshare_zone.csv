@@ -1,0 +1,21 @@
+location_id,borough,zone,service_zone,latitude,longitude
+1,EWR,Newark Airport,EWR,40.689529,-74.174461
+4,Manhattan,Alphabet City,Yellow Zone,40.726184,-73.978886
+12,Manhattan,Battery Park,Yellow Zone,40.702715,-74.015806
+13,Manhattan,Battery Park City,Yellow Zone,40.710067,-74.016367
+24,Manhattan,Bloomingdale,Yellow Zone,40.798822,-73.973244
+43,Manhattan,Central Park,Yellow Zone,40.79432,-73.954808
+48,Manhattan,Clinton East,Yellow Zone,40.73548,-73.990616
+68,Manhattan,East Chelsea,Yellow Zone,40.742418,-74.005537
+79,Manhattan,East Village,Yellow Zone,40.72762,-73.98593
+132,Queens,JFK Airport,Airports,40.641311,-73.778139
+138,Queens,LaGuardia Airport,Airports,40.776927,-73.873966
+161,Manhattan,Midtown Center,Yellow Zone,40.758,-73.9855
+162,Manhattan,Midtown East,Yellow Zone,40.754931,-73.971834
+186,Manhattan,Penn Station/Madison Sq West,Yellow Zone,40.750568,-73.993519
+230,Manhattan,Times Sq/Theatre District,Yellow Zone,40.758896,-73.98513
+237,Manhattan,Upper East Side South,Yellow Zone,40.7685,-73.9647
+33,Brooklyn,Brooklyn Heights,Boro Zone,40.696455,-73.998299
+61,Brooklyn,Crown Heights North,Boro Zone,40.674118,-73.954691
+18,Bronx,Bedford Park,Boro Zone,40.872134,-73.887864
+5,Staten Island,Arden Heights,Boro Zone,40.554598,-74.185205

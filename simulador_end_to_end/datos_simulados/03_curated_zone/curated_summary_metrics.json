@@ -1,0 +1,339 @@
+{
+  "rls_governance_demo": {
+    "policy_name": "rls_biglake_rideshare_zone_csv",
+    "filter_expression": "borough = 'Manhattan'",
+    "total_zones_before_rls": 20,
+    "visible_zones_after_rls": 13,
+    "manhattan_zones_sample": "Alphabet City, Battery Park, Battery Park City, Bloomingdale, Central Park, Clinton East, East Chelsea, East Village, Midtown Center, Midtown East, Penn Station/Madison Sq West, Times Sq/Theatre District, Upper East Side South"
+  },
+  "omni_multicloud_federation": [
+    {
+      "cloud_provider": "AWS_S3_OMNI",
+      "total_rides": 40,
+      "avg_passengers": 2.42,
+      "avg_tip": 9.97,
+      "avg_total_fare": 62.79
+    },
+    {
+      "cloud_provider": "AZURE_ADLS_OMNI",
+      "total_rides": 20,
+      "avg_passengers": 2.45,
+      "avg_tip": 9.01,
+      "avg_total_fare": 63.25
+    }
+  ],
+  "bigsearch_exact_lookup": [
+    {
+      "rideshare_trip_id": "TRIP-ICEBERG-2026-0001",
+      "pickup_location_id": 138,
+      "dropoff_location_id": 43,
+      "total_amount": 118.57,
+      "credit_card_masked": "****-****-****-5710",
+      "credit_card_aead_cipher": "AEAD_CIPHERTEXT(f2db5748f718c68ea2e9097f)",
+      "search_index_mode": "FULLY_USED (NO_OP_ANALYZER)"
+    }
+  ],
+  "gemini_llm_customer_profiles": [
+    {
+      "customer_id": 201,
+      "customer_name": "Sofía Valdés",
+      "customer_attribute_summary": "Prefiere vehículos silenciosos para tomar llamadas ejecutivas, aire acondicionado fresco y rutas directas a aeropuertos.",
+      "customer_review_summary": "Valora la puntualidad extrema, limpieza interior y conductores que respetan el espacio de trabajo.",
+      "total_trip_count": 68,
+      "avg_tip_amount": 14.5,
+      "sum_total_amount": 4576.4,
+      "preferred_drivers": [
+        {
+          "driver_id": 101,
+          "driver_name": "Carlos Mendoza",
+          "similarity_score": 0.9998
+        },
+        {
+          "driver_id": 102,
+          "driver_name": "Elena Rostova",
+          "similarity_score": 0.9952
+        }
+      ]
+    },
+    {
+      "customer_id": 202,
+      "customer_name": "Liam O'Connor",
+      "customer_attribute_summary": "Viaja en familia con niños y equipaje; prefiere SUV espaciosa, conversación amena y recomendaciones locales.",
+      "customer_review_summary": "Deja reseñas entusiastas cuando el conductor ayuda con las maletas y mantiene un ambiente cálido.",
+      "total_trip_count": 42,
+      "avg_tip_amount": 10.2,
+      "sum_total_amount": 2280.6,
+      "preferred_drivers": [
+        {
+          "driver_id": 103,
+          "driver_name": "Marcus Vance",
+          "similarity_score": 0.9994
+        },
+        {
+          "driver_id": 105,
+          "driver_name": "Devon Brooks",
+          "similarity_score": 0.9591
+        }
+      ]
+    },
+    {
+      "customer_id": 203,
+      "customer_name": "Dr. Kenji Takahashi",
+      "customer_attribute_summary": "Prioriza seguridad vial, conducción ecológica sin frenazos, música jazz instrumental o silencio.",
+      "customer_review_summary": "Muy analítico en sus reseñas; premia la cortesía y la eficiencia en rutas por Upper East Side.",
+      "total_trip_count": 95,
+      "avg_tip_amount": 6.8,
+      "sum_total_amount": 3629.0,
+      "preferred_drivers": [
+        {
+          "driver_id": 102,
+          "driver_name": "Elena Rostova",
+          "similarity_score": 0.9989
+        },
+        {
+          "driver_id": 104,
+          "driver_name": "Aisha Patel",
+          "similarity_score": 0.9979
+        }
+      ]
+    },
+    {
+      "customer_id": 204,
+      "customer_name": "Camila Restrepo",
+      "customer_attribute_summary": "Usuaria frecuente en horas pico vespertinas; requiere cargador USB-C y rutas ágiles hacia Brooklyn Heights.",
+      "customer_review_summary": "Aprecia vehículos modernos, olor agradable y conductores que conocen atajos ante tráfico pesado.",
+      "total_trip_count": 38,
+      "avg_tip_amount": 8.27,
+      "sum_total_amount": 1640.5,
+      "preferred_drivers": [
+        {
+          "driver_id": 104,
+          "driver_name": "Aisha Patel",
+          "similarity_score": 0.9998
+        },
+        {
+          "driver_id": 102,
+          "driver_name": "Elena Rostova",
+          "similarity_score": 0.9975
+        }
+      ]
+    }
+  ],
+  "bqml_high_value_predictions": [
+    {
+      "location_id": 132,
+      "borough": "Queens",
+      "zone": "JFK Airport",
+      "pickup_hour": 18,
+      "ride_distance": 16.8,
+      "is_raining": true,
+      "people_traveling_cnt": 142,
+      "is_high_value_ride": true,
+      "predicted_probability": 0.964,
+      "recommended_action": "DESPACHAR PRIORIDAD: Alta demanda ejecutiva + lluvia en Terminal 4"
+    },
+    {
+      "location_id": 230,
+      "borough": "Manhattan",
+      "zone": "Times Sq/Theatre District",
+      "pickup_hour": 18,
+      "ride_distance": 7.4,
+      "is_raining": true,
+      "people_traveling_cnt": 118,
+      "is_high_value_ride": true,
+      "predicted_probability": 0.928,
+      "recommended_action": "POSICIONAR FLOTA: Salida de teatros y oficinas con tarifa dinámica"
+    },
+    {
+      "location_id": 161,
+      "borough": "Manhattan",
+      "zone": "Midtown Center",
+      "pickup_hour": 18,
+      "ride_distance": 9.1,
+      "is_raining": true,
+      "people_traveling_cnt": 96,
+      "is_high_value_ride": true,
+      "predicted_probability": 0.895,
+      "recommended_action": "ALTA RENTABILIDAD: Viajes corporativos hacia aeropuertos y Brooklyn"
+    },
+    {
+      "location_id": 138,
+      "borough": "Queens",
+      "zone": "LaGuardia Airport",
+      "pickup_hour": 18,
+      "ride_distance": 11.2,
+      "is_raining": true,
+      "people_traveling_cnt": 88,
+      "is_high_value_ride": true,
+      "predicted_probability": 0.872,
+      "recommended_action": "DESPACHAR PRIORIDAD: Llegadas de vuelos nacionales vespertinos"
+    },
+    {
+      "location_id": 186,
+      "borough": "Manhattan",
+      "zone": "Penn Station/Madison Sq West",
+      "pickup_hour": 18,
+      "ride_distance": 5.8,
+      "is_raining": false,
+      "people_traveling_cnt": 74,
+      "is_high_value_ride": true,
+      "predicted_probability": 0.784,
+      "recommended_action": "DEMANDA SOSTENIDA: Conexión ferroviaria regional"
+    },
+    {
+      "location_id": 33,
+      "borough": "Brooklyn",
+      "zone": "Brooklyn Heights",
+      "pickup_hour": 18,
+      "ride_distance": 4.9,
+      "is_raining": false,
+      "people_traveling_cnt": 41,
+      "is_high_value_ride": false,
+      "predicted_probability": 0.412,
+      "recommended_action": "FLUJO ESTÁNDAR: Mantener unidades locales sin recargo"
+    },
+    {
+      "location_id": 5,
+      "borough": "Staten Island",
+      "zone": "Arden Heights",
+      "pickup_hour": 18,
+      "ride_distance": 3.2,
+      "is_raining": false,
+      "people_traveling_cnt": 12,
+      "is_high_value_ride": false,
+      "predicted_probability": 0.145,
+      "recommended_action": "BAJA DEMANDA: Reubicar conductores hacia Manhattan Sur"
+    }
+  ],
+  "vision_ai_unstructured_analytics": [
+    {
+      "uri": "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_003.jpg",
+      "location_id": 43,
+      "detected_object": "Pedestrian & Bicycle",
+      "object_confidence": 0.9769,
+      "detected_landmark": "Landmark: Central Park",
+      "landmark_confidence": 0.9058,
+      "safety_status": "SAFE_TRAFFIC_FLOW"
+    },
+    {
+      "uri": "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_006.jpg",
+      "location_id": 161,
+      "detected_object": "Executive Black SUV",
+      "object_confidence": 0.9768,
+      "detected_landmark": "Landmark: Rockefeller Center",
+      "landmark_confidence": 0.8957,
+      "safety_status": "SAFE_TRAFFIC_FLOW"
+    },
+    {
+      "uri": "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_004.jpg",
+      "location_id": 186,
+      "detected_object": "High Crowd Density",
+      "object_confidence": 0.9745,
+      "detected_landmark": "Landmark: Madison Square Garden",
+      "landmark_confidence": 0.9318,
+      "safety_status": "SAFE_TRAFFIC_FLOW"
+    },
+    {
+      "uri": "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_007.jpg",
+      "location_id": 138,
+      "detected_object": "Airport Shuttle Lane",
+      "object_confidence": 0.9743,
+      "detected_landmark": "Landmark: LaGuardia Airport",
+      "landmark_confidence": 0.9312,
+      "safety_status": "SAFE_TRAFFIC_FLOW"
+    },
+    {
+      "uri": "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_001.jpg",
+      "location_id": 230,
+      "detected_object": "Vehicle/Taxi Fleet",
+      "object_confidence": 0.9715,
+      "detected_landmark": "Landmark: Times Square",
+      "landmark_confidence": 0.9199,
+      "safety_status": "SAFE_TRAFFIC_FLOW"
+    },
+    {
+      "uri": "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_005.jpg",
+      "location_id": 12,
+      "detected_object": "Rainy Street Reflection",
+      "object_confidence": 0.9687,
+      "detected_landmark": "Landmark: Statue of Liberty View",
+      "landmark_confidence": 0.9469,
+      "safety_status": "SAFE_TRAFFIC_FLOW"
+    },
+    {
+      "uri": "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_008.jpg",
+      "location_id": 33,
+      "detected_object": "Evening Rush Traffic",
+      "object_confidence": 0.9405,
+      "detected_landmark": "Landmark: Brooklyn Bridge",
+      "landmark_confidence": 0.8939,
+      "safety_status": "SAFE_TRAFFIC_FLOW"
+    },
+    {
+      "uri": "gs://rideshare-lakehouse-raw-bucket/rideshare_images/rideshare_cam_002.jpg",
+      "location_id": 132,
+      "detected_object": "Luggage & Passenger Queue",
+      "object_confidence": 0.9231,
+      "detected_landmark": "Landmark: JFK Airport",
+      "landmark_confidence": 0.9391,
+      "safety_status": "SAFE_TRAFFIC_FLOW"
+    }
+  ],
+  "dataplex_governance_quality": [
+    {
+      "dq_check_id": "DQ-001",
+      "target_dataset": "rideshare_lakehouse_curated",
+      "target_table": "bigquery_rideshare_trip",
+      "column_name": "rideshare_trip_id",
+      "rule_type": "NOT_NULL & UNIQUE",
+      "evaluated_rows": 120,
+      "passed_rows": 120,
+      "pass_rate_pct": 100.0,
+      "dq_status": "PASSED"
+    },
+    {
+      "dq_check_id": "DQ-002",
+      "target_dataset": "rideshare_lakehouse_curated",
+      "target_table": "bigquery_rideshare_trip",
+      "column_name": "total_amount",
+      "rule_type": "VALUE_RANGE",
+      "evaluated_rows": 120,
+      "passed_rows": 120,
+      "pass_rate_pct": 100.0,
+      "dq_status": "PASSED"
+    },
+    {
+      "dq_check_id": "DQ-003",
+      "target_dataset": "rideshare_lakehouse_curated",
+      "target_table": "bigquery_rideshare_trip",
+      "column_name": "pickup_location_id",
+      "rule_type": "REFERENTIAL_INTEGRITY",
+      "evaluated_rows": 120,
+      "passed_rows": 120,
+      "pass_rate_pct": 100.0,
+      "dq_status": "PASSED"
+    },
+    {
+      "dq_check_id": "DQ-004",
+      "target_dataset": "rideshare_llm_curated",
+      "target_table": "customer_review",
+      "column_name": "review_sentiment",
+      "rule_type": "ALLOWED_VALUES",
+      "evaluated_rows": 5,
+      "passed_rows": 5,
+      "pass_rate_pct": 100.0,
+      "dq_status": "PASSED"
+    },
+    {
+      "dq_check_id": "DQ-005",
+      "target_dataset": "rideshare_lakehouse_curated",
+      "target_table": "bigquery_rideshare_trip",
+      "column_name": "credit_card_masked",
+      "rule_type": "PII_MASKING_POLICY",
+      "evaluated_rows": 120,
+      "passed_rows": 120,
+      "pass_rate_pct": 100.0,
+      "dq_status": "PASSED"
+    }
+  ]
+}
