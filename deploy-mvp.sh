@@ -42,33 +42,58 @@ for arg in "$@"; do
   esac
 done
 
-GCP_ACCOUNT_NAME="${POS_ARGS[0]:-$(gcloud config get-value account 2>/dev/null)}"
-PROJECT_ID="${POS_ARGS[1]:-$(gcloud config get-value project 2>/dev/null)}"
+GCP_ACCOUNT_NAME="${POS_ARGS[0]:-$(gcloud config get-value account 2>/dev/null || true)}"
+PROJECT_ID="${POS_ARGS[1]:-$(gcloud config get-value project 2>/dev/null || true)}"
+
+if [[ "${GCP_ACCOUNT_NAME}" == "otro-correo@dominio.com" || "${PROJECT_ID}" == "otro-proyecto-id" ]]; then
+  echo "⚠️  Usaste los textos de ejemplo ('otro-correo@dominio.com' / 'otro-proyecto-id')."
+  echo "👉 Reemplázalos por el correo y el Project ID reales de GCP donde quieres desplegar, por ejemplo:"
+  echo "   ./deploy-mvp.sh \"admin@anitaquevedo.altostrat.com\" \"end-to-end-testing-513621\""
+  exit 1
+fi
 
 if [[ -z "${GCP_ACCOUNT_NAME}" || -z "${PROJECT_ID}" ]]; then
   echo "❌ Error: Debes autenticarte en gcloud o pasar los parámetros:"
-  echo "   ./deploy-mvp.sh <tu-correo@dominio.com> <tu-project-id> [--with-composer] [--with-colab] [--all]"
+  echo "   ./deploy-mvp.sh <tu-correo-real@dominio.com> <tu-project-id-real> [--with-composer] [--with-colab] [--all]"
   exit 1
 fi
 
 export CLOUDSDK_CORE_ACCOUNT="${GCP_ACCOUNT_NAME}"
 export CLOUDSDK_CORE_PROJECT="${PROJECT_ID}"
 
-PROJECT_NUMBER="${POS_ARGS[2]:-$(gcloud projects describe "${PROJECT_ID}" --format="value(projectNumber)" 2>/dev/null)}"
+# 1. Verifica o inicia sesión con el correo indicado ANTES de consultar el proyecto
+ACCESS_TOKEN="$(gcloud auth print-access-token --account="${GCP_ACCOUNT_NAME}" 2>/dev/null || true)"
+if [[ -z "${ACCESS_TOKEN}" ]]; then
+  echo "🔑 La cuenta '${GCP_ACCOUNT_NAME}' no tiene sesión activa en gcloud. Iniciando login..."
+  gcloud auth login "${GCP_ACCOUNT_NAME}"
+  ACCESS_TOKEN="$(gcloud auth print-access-token --account="${GCP_ACCOUNT_NAME}" 2>/dev/null || true)"
+fi
+
+if [[ -z "${ACCESS_TOKEN}" ]]; then
+  echo "❌ Error: No se pudo obtener el token de acceso para '${GCP_ACCOUNT_NAME}'."
+  exit 1
+fi
+export GOOGLE_OAUTH_ACCESS_TOKEN="${ACCESS_TOKEN}"
+
+# 2. Obtiene el Project Number con || true para que set -e no aborte en silencio si el proyecto no existe
+PROJECT_NUMBER="${POS_ARGS[2]:-$(gcloud projects describe "${PROJECT_ID}" --format="value(projectNumber)" 2>/dev/null || true)}"
 
 if [[ -z "${PROJECT_NUMBER}" ]]; then
-  echo "❌ Error: No se pudo obtener el project_number del proyecto '${PROJECT_ID}' con la cuenta '${GCP_ACCOUNT_NAME}'."
-  echo "   Si es un correo nuevo, primero autentícalo con: gcloud auth login ${GCP_ACCOUNT_NAME}"
+  echo "❌ Error: No se encontró el proyecto '${PROJECT_ID}' o la cuenta '${GCP_ACCOUNT_NAME}' no tiene permisos sobre él."
+  echo "   Proyectos disponibles para '${GCP_ACCOUNT_NAME}':"
+  gcloud projects list --format="table(projectId,name,projectNumber)" || true
   exit 1
 fi
 
-# Aislamiento modular de estado (tfstate) por proyecto para poder desplegar en múltiples proyectos sin conflictos
+# 3. Aislamiento modular de estado (tfstate) por proyecto
 STATE_ARG=()
+STATE_LABEL="terraform.tfstate (por defecto)"
 if [[ -f "${TF_DIR}/terraform.tfstate" ]]; then
   EXISTING_STATE_PROJECT="$(python3 -c "import json; d=json.load(open('${TF_DIR}/terraform.tfstate')); print(d.get('outputs',{}).get('project_id',{}).get('value',''))" 2>/dev/null || true)"
   if [[ -n "${EXISTING_STATE_PROJECT}" && "${EXISTING_STATE_PROJECT}" != "${PROJECT_ID}" ]]; then
     STATE_FILE="terraform.${PROJECT_ID}.tfstate"
     STATE_ARG=("-state=${STATE_FILE}")
+    STATE_LABEL="${STATE_FILE} (aislado para ${PROJECT_ID})"
   fi
 fi
 
@@ -81,17 +106,8 @@ echo "🆔 Project ID           : ${PROJECT_ID}"
 echo "🔢 Project Number       : ${PROJECT_NUMBER}"
 echo "🎼 Cloud Composer       : ${ENABLE_COMPOSER}"
 echo "📓 Colab Runtime VM     : ${ENABLE_COLAB_RUNTIME}"
-echo "💾 Estado Terraform     : ${STATE_ARG[0]:--state=terraform.tfstate (por defecto)}"
+echo "💾 Estado Terraform     : ${STATE_LABEL}"
 echo "=================================================================="
-
-# Inyecta el token activo de la cuenta seleccionada para evitar errores 'invalid_rapt' de ADC expirado
-ACCESS_TOKEN="$(gcloud auth print-access-token --account="${GCP_ACCOUNT_NAME}" 2>/dev/null || true)"
-if [[ -z "${ACCESS_TOKEN}" ]]; then
-  echo "⚠️ Sesión expirada para '${GCP_ACCOUNT_NAME}'. Ejecutando 'gcloud auth login ${GCP_ACCOUNT_NAME}'..."
-  gcloud auth login "${GCP_ACCOUNT_NAME}"
-  ACCESS_TOKEN="$(gcloud auth print-access-token --account="${GCP_ACCOUNT_NAME}" 2>/dev/null)"
-fi
-export GOOGLE_OAUTH_ACCESS_TOKEN="${ACCESS_TOKEN}"
 
 terraform -chdir="${TF_DIR}" init
 

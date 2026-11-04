@@ -15,10 +15,10 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TF_DIR="${REPO_DIR}/terraform"
 
 # 2. Obtiene correo (del 1er argumento o automáticamente de gcloud)
-GCP_ACCOUNT_NAME="${1:-$(gcloud config get-value account 2>/dev/null)}"
+GCP_ACCOUNT_NAME="${1:-$(gcloud config get-value account 2>/dev/null || true)}"
 
 # 3. Obtiene Project ID (del 2do argumento o automáticamente de gcloud)
-PROJECT_ID="${2:-$(gcloud config get-value project 2>/dev/null)}"
+PROJECT_ID="${2:-$(gcloud config get-value project 2>/dev/null || true)}"
 
 if [[ -z "${GCP_ACCOUNT_NAME}" || -z "${PROJECT_ID}" ]]; then
   echo "❌ Error: Debes autenticarte en gcloud o pasar los parámetros:"
@@ -30,11 +30,13 @@ export CLOUDSDK_CORE_ACCOUNT="${GCP_ACCOUNT_NAME}"
 export CLOUDSDK_CORE_PROJECT="${PROJECT_ID}"
 
 # 4. Obtiene automáticamente el Project Number a partir del Project ID
-PROJECT_NUMBER="${3:-$(gcloud projects describe "${PROJECT_ID}" --format="value(projectNumber)" 2>/dev/null)}"
+PROJECT_NUMBER="${3:-$(gcloud projects describe "${PROJECT_ID}" --format="value(projectNumber)" 2>/dev/null || true)}"
 
 STATE_ARG=()
+STATE_LABEL="terraform.tfstate (por defecto)"
 if [[ -f "${TF_DIR}/terraform.${PROJECT_ID}.tfstate" ]]; then
   STATE_ARG=("-state=terraform.${PROJECT_ID}.tfstate")
+  STATE_LABEL="terraform.${PROJECT_ID}.tfstate (aislado para ${PROJECT_ID})"
 fi
 
 echo "=================================================================="
@@ -44,7 +46,7 @@ echo "📂 Ruta Terraform  : ${TF_DIR}"
 echo "👤 Cuenta GCP      : ${GCP_ACCOUNT_NAME}"
 echo "🆔 Project ID      : ${PROJECT_ID}"
 echo "🔢 Project Number  : ${PROJECT_NUMBER}"
-echo "💾 Estado Terraform: ${STATE_ARG[0]:--state=terraform.tfstate (por defecto)}"
+echo "💾 Estado Terraform: ${STATE_LABEL}"
 echo "=================================================================="
 
 # 5. Limpia recursos anidados de Dataform (Workspaces y Notebooks creados vía REST API) con ?force=true
