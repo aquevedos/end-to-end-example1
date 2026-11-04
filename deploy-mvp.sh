@@ -44,10 +44,19 @@ echo "🆔 Project ID      : ${PROJECT_ID}"
 echo "🔢 Project Number  : ${PROJECT_NUMBER}"
 echo "=================================================================="
 
-# 5. Ejecuta Terraform Init y Apply usando la ruta dinámica
+# 5. Inyecta el token activo de gcloud en GOOGLE_OAUTH_ACCESS_TOKEN para evitar errores 'invalid_rapt' de ADC expirado
+ACCESS_TOKEN="$(gcloud auth print-access-token 2>/dev/null || true)"
+if [[ -z "${ACCESS_TOKEN}" ]]; then
+  echo "⚠️ Sesión de gcloud expirada. Ejecutando 'gcloud auth login'..."
+  gcloud auth login
+  ACCESS_TOKEN="$(gcloud auth print-access-token 2>/dev/null)"
+fi
+export GOOGLE_OAUTH_ACCESS_TOKEN="${ACCESS_TOKEN}"
+
+# 6. Ejecuta Terraform Init y Apply usando la ruta dinámica
 terraform -chdir="${TF_DIR}" init
 
-terraform -chdir="${TF_DIR}" apply \
+terraform -chdir="${TF_DIR}" apply -auto-approve \
   -var="gcp_account_name=${GCP_ACCOUNT_NAME}" \
   -var="project_id=${PROJECT_ID}" \
   -var="project_number=${PROJECT_NUMBER}"

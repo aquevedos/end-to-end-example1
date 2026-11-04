@@ -42,6 +42,7 @@ echo "=================================================================="
 echo "🔄 Limpiando repositorios y workspaces anidados de Dataform..."
 ACCESS_TOKEN="$(gcloud auth print-access-token 2>/dev/null || true)"
 if [[ -n "${ACCESS_TOKEN}" ]]; then
+  export GOOGLE_OAUTH_ACCESS_TOKEN="${ACCESS_TOKEN}"
   curl -s -X DELETE \
     --header "Authorization: Bearer ${ACCESS_TOKEN}" \
     "https://dataform.googleapis.com/v1beta1/projects/${PROJECT_ID}/locations/us-central1/repositories/dataform_golden_demo/workspaces/demo_flow" >/dev/null 2>&1 || true
