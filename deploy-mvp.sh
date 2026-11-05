@@ -60,11 +60,15 @@ fi
 
 export CLOUDSDK_CORE_ACCOUNT="${GCP_ACCOUNT_NAME}"
 export CLOUDSDK_CORE_PROJECT="${PROJECT_ID}"
+export CLOUDSDK_BILLING_QUOTA_PROJECT=""
+export CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT=""
 
-# 1. Verifica o inicia sesión con el correo indicado ANTES de consultar el proyecto
+# 1. Verifica que exista un token OAuth realmente válido para ese correo (validando contra tokeninfo)
 ACCESS_TOKEN="$(gcloud auth print-access-token --account="${GCP_ACCOUNT_NAME}" 2>/dev/null || true)"
-if [[ -z "${ACCESS_TOKEN}" ]]; then
-  echo "🔑 La cuenta '${GCP_ACCOUNT_NAME}' no tiene sesión activa en gcloud. Iniciando login..."
+TOKEN_VALID="$(curl -s "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${ACCESS_TOKEN}" | grep -o '"issued_to"' || true)"
+
+if [[ -z "${ACCESS_TOKEN}" || -z "${TOKEN_VALID}" ]]; then
+  echo "🔑 Iniciando sesión en gcloud para '${GCP_ACCOUNT_NAME}'..."
   gcloud auth login "${GCP_ACCOUNT_NAME}"
   ACCESS_TOKEN="$(gcloud auth print-access-token --account="${GCP_ACCOUNT_NAME}" 2>/dev/null || true)"
 fi
@@ -75,13 +79,28 @@ if [[ -z "${ACCESS_TOKEN}" ]]; then
 fi
 export GOOGLE_OAUTH_ACCESS_TOKEN="${ACCESS_TOKEN}"
 
-# 2. Obtiene el Project Number con || true para que set -e no aborte en silencio si el proyecto no existe
-PROJECT_NUMBER="${POS_ARGS[2]:-$(gcloud projects describe "${PROJECT_ID}" --format="value(projectNumber)" 2>/dev/null || true)}"
+# 2. Obtiene el Project Number (1ro del 3er argumento si se pasó, 2do de gcloud, 3ro vía API REST directa con curl)
+PROJECT_NUMBER="${POS_ARGS[2]:-}"
 
 if [[ -z "${PROJECT_NUMBER}" ]]; then
-  echo "❌ Error: No se encontró el proyecto '${PROJECT_ID}' o la cuenta '${GCP_ACCOUNT_NAME}' no tiene permisos sobre él."
-  echo "   Proyectos disponibles para '${GCP_ACCOUNT_NAME}':"
-  gcloud projects list --format="table(projectId,name,projectNumber)" || true
+  PROJECT_NUMBER="$(gcloud projects describe "${PROJECT_ID}" --account="${GCP_ACCOUNT_NAME}" --format="value(projectNumber)" 2>/dev/null || true)"
+fi
+
+if [[ -z "${PROJECT_NUMBER}" ]]; then
+  CRM_RESP="$(curl -s -H "Authorization: Bearer ${ACCESS_TOKEN}" "https://cloudresourcemanager.googleapis.com/v1/projects/${PROJECT_ID}" || true)"
+  PROJECT_NUMBER="$(echo "${CRM_RESP}" | python3 -c "import sys, json; d=json.load(sys.stdin); print(d.get('projectNumber',''))" 2>/dev/null || true)"
+fi
+
+if [[ -z "${PROJECT_NUMBER}" ]]; then
+  echo "❌ Error: No se pudo encontrar el Project ID '${PROJECT_ID}' con la cuenta '${GCP_ACCOUNT_NAME}'."
+  echo "🔎 Detalle devuelto por Google Cloud:"
+  gcloud projects describe "${PROJECT_ID}" --account="${GCP_ACCOUNT_NAME}" 2>&1 || true
+  echo ""
+  echo "📋 Proyectos disponibles actualmente para '${GCP_ACCOUNT_NAME}':"
+  gcloud projects list --account="${GCP_ACCOUNT_NAME}" --format="table(projectId,name,projectNumber)" || true
+  echo ""
+  echo "💡 Tip: También puedes pasar el Project Number directamente como 3er parámetro:"
+  echo "   ./deploy-mvp.sh \"${GCP_ACCOUNT_NAME}\" \"${PROJECT_ID}\" \"158808485666\""
   exit 1
 fi
 
