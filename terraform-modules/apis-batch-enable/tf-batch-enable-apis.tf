@@ -382,3 +382,15 @@ resource "google_project_service" "service-workflows" {
   service            = "workflows.googleapis.com"
   disable_on_destroy = false
 }
+
+resource "google_project_service" "service-iam" {
+  project            = var.project_id
+  service            = "iam.googleapis.com"
+  disable_on_destroy = false
+}
+
+resource "google_project_service" "service-iamcredentials" {
+  project            = var.project_id
+  service            = "iamcredentials.googleapis.com"
+  disable_on_destroy = false
+}
